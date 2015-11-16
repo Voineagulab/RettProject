@@ -91,5 +91,5 @@ colnames(FDR_seq)[1:2]<-c("geneID","geneNames")
 
 FDR_seq <- cbind(FDR_seq, N[match(FDR_seq$geneID,rownames(N)),])
 
-## save(FDR_seq, file="Results/FDR_seq.rda")
+## save(FDR_seq, file="../Results/FDR_seq.rda")
 
