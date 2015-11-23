@@ -14,3 +14,6 @@ This file performs differential expression analysis on RNASeq data.
 
 ## validation.R #################################
 This file uses micro-array data to calculate the validation rate of the RNA-Seq differentially expressed genes - 74%. 
+
+## ontology.R #################################	
+Gene ontology analysis using goseq.
