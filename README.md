@@ -5,7 +5,7 @@
 3. The codes in this repository are now executable. 
 
 ## geneCounts.R ######################################
-This file counts the number of RNASeq transcripts aligned to each gene. 
+This script generates gene-level quantification of RNASeq reads. 
 
 
 ## DEAnalysis.R ##################################
