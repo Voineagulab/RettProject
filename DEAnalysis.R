@@ -1,6 +1,6 @@
 ## Load required packages ##########################################
-library("edgeR")
-library("RUVSeq")
+library(edgeR)
+library(RUVSeq)
 
 ## Load inputs/data #############################################
 load("../Results/geneCounts.rda")

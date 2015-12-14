@@ -1,5 +1,5 @@
 ## load package and data ##########################
-library("goseq")
+library(goseq)
 load("../Data/geneInfo.rda")
 load("../Results/FDR_seq.rda")
 load("../Results/FDR_array.rda")

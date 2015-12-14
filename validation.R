@@ -1,6 +1,6 @@
 ## load required packages ##################
-library("limma")
-library("ruv")
+library(limma)
+library(ruv)
 
 ## micro-array data #######################
 dataExp=read.csv("../Data/dataExpProbes.csv")
