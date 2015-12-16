@@ -80,7 +80,7 @@ text(intk2$x, intk2$y, Samples_array,
      col=c(rep("BLUE",6),rep("RED",6)))
 
 ## RUV2 normalisation with k=2 ##########################
-RUVArray <- RUV2(Y=t(useExp), X=t(t(c(rep(0,6), rep(1,6)))), ctl=ctl, k=2)
+RUVnArray <- RUV2(Y=t(useExp), X=t(t(c(rep(0,6), rep(1,6)))), ctl=ctl, k=2)
 W2 <- RUVnArray$W
 I <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,1]
 C <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,-1]
@@ -94,6 +94,8 @@ intk2 <- plotMDS(R2, col=c(rep("BLUE",6),rep("RED",6)),
 text(intk2$x, intk2$y, Samples_array,
      pos=c(1,1,2,4,3,3,1,1,1,1,1,1),
      col=c(rep("BLUE",6),rep("RED",6)))
+
+## save(R2, file="../Results/R2.rda")
 
 ## Differential expression analysis #################
 
