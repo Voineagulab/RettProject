@@ -39,7 +39,6 @@ abline(h=0.5, col="grey")
 group_seq <- c("control", "control", "control", "Rett", "Rett", "Rett")
 input <- DGEList(counts=counts, group=group_seq)
 input <- calcNormFactors(input)
-tmm <- cpm(input, normalized.lib.sizes=TRUE)
 plotMDS(input, col=c(rep("blue",3),rep("red",3)),
         xlab="PC1", ylab="PC2", main="TMM Normalisation")
 
