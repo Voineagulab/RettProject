@@ -95,6 +95,7 @@ text(intk2$x, intk2$y, Samples_array,
      pos=c(1,1,2,4,3,3,1,1,1,1,1,1),
      col=c(rep("BLUE",6),rep("RED",6)))
 
+R2<-cbind(infoExp,R2)
 ## save(R2, file="../Results/R2.rda")
 
 ## Differential expression analysis #################
