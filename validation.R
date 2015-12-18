@@ -1,6 +1,7 @@
 ## load required packages ##################
 library(limma)
 library(ruv)
+library(EDASeq)
 
 ## micro-array data #######################
 dataExp=read.csv("../Data/dataExpProbes.csv")
@@ -21,6 +22,8 @@ barplot(height=1-as.numeric(Astro_array[1,-1]),
         ylim=c(0.48,0.52), col=c(rep("blue", 6), rep("red", 6)),
         xpd=FALSE)
 abline(h=0.5, col="grey")
+
+plotPCA(as.matrix(useExp),isLog=TRUE)
 
 ## Array PC plots  ###########################
 
@@ -95,7 +98,15 @@ text(intk2$x, intk2$y, Samples_array,
      pos=c(1,1,2,4,3,3,1,1,1,1,1,1),
      col=c(rep("BLUE",6),rep("RED",6)))
 
+R1 <- removeBatchEffect(useExp,covariates=W2,design=model.matrix(~group_array))
+
+R1<-cbind(infoExp,R1)
 R2<-cbind(infoExp,R2)
+
+plotPCA(as.matrix(R1[,-c(1,2)]),isLog=TRUE)
+plotPCA(as.matrix(R2[,-c(1,2)]),isLog=TRUE)
+
+## save(R1, file="../Results/R1.rda")
 ## save(R2, file="../Results/R2.rda")
 
 ## Differential expression analysis #################

@@ -1,6 +1,7 @@
 ## Load required packages ##########################################
 library(edgeR)
 library(RUVSeq)
+library(EDASeq)
 
 ## Load inputs/data #############################################
 load("../Results/geneCounts.rda")
@@ -41,6 +42,7 @@ input <- DGEList(counts=counts, group=group_seq)
 input <- calcNormFactors(input)
 plotMDS(input, col=c(rep("blue",3),rep("red",3)),
         xlab="PC1", ylab="PC2", main="TMM Normalisation")
+plotPCA(counts)
 
 ## first past differential expression analysis ####################################
 
@@ -62,6 +64,8 @@ RUV2 <- RUVg(counts, controlGenes, k=2)
 plotMDS(DGEList(RUV2$normalizedCounts), col=c(rep("blue",3),rep("red",3)),
         xlab="PC1", ylab="PC2", main="RUVg (k=2)")
 
+plotPCA(N)
+## save(N, file="../Results/N.rda")
 ## Differential expression analysis #############################################
 design <- model.matrix(~RUV1$W+group_seq)
 
