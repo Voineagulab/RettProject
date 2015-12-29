@@ -14,7 +14,37 @@ group_array <- c(rep("control", 6), rep("Rett", 6))
 
 colnames(useExp) <- Samples_array
 
-## Array Nuron Levels Plot ###########################
+## Adding ProbeID #############################
+
+load("../Data/probe.rda")
+# 
+# probe <- data.frame(probe)
+# infoExp <- data.frame(infoExp)
+
+infoExp <- data.frame(infoExp[,1],
+                 probe[match(infoExp$ProbeID, probe$Array_Address_Id),c("Probe_Id")], 
+                 infoExp[,-1])
+
+colnames(infoExp)[1:3] <- c("GeneName","ProbeID", "AddressID")
+
+## Correcting gene names ############
+
+infoExp$GeneName <- as.vector(infoExp$GeneName)
+
+infoExp$GeneName[grep("Mar",infoExp$GeneName)] <- paste("MARCH",substr(infoExp$GeneName[grep("Mar",infoExp$GeneName)],1,1),sep="")
+infoExp$GeneName[grep("Sep",infoExp$GeneName)] <- paste("SEPT",substr(infoExp$GeneName[grep("Sep",infoExp$GeneName)],1,1),sep="")
+
+## Adding GeneID ########################
+
+arrayAnnot=read.csv("../Annot/HumanHT-12_V4_0_R2_15002873_B 2.csv")
+conv=read.csv("../Annot/conv_refseq_ensembl.csv")
+m=match(infoExp$AddressID, arrayAnnot$Array_Address_Id)
+infoExp$TxID=arrayAnnot$TxID_noV[m]
+m=match(infoExp$TxID, conv$From)
+infoExp$GeneID <- conv$To[m]
+infoExp <- infoExp[,c("GeneName","GeneID","TxID","ProbeID","AddressID")]
+
+## Array Neuron Levels Plot ###########################
 load("../Data/Astro_array.rda")
 barplot(height=1-as.numeric(Astro_array[1,-1]), 
         names.arg=Samples_array,
@@ -25,125 +55,28 @@ abline(h=0.5, col="grey")
 
 plotPCA(as.matrix(useExp),isLog=TRUE)
 
-## Array PC plots  ###########################
-
-par(mfrow=c(2,2))
-intUQ <- plotMDS(useExp, col=c(rep("BLUE",6),rep("RED",6)), 
-                 xlab="PC1", ylab="PC2", 
-                 xlim=c(-0.6,1.2), ylim=c(-1.1,0.6),
-                 main="UQ",dim.plot = c(1,2), pch=20)
-text(intUQ$x, intUQ$y, Samples_array,
-     pos=c(1,1,1,1,3,1,3,3,1,2,1,1),
-     col=c(rep("BLUE",6),rep("RED",6)))
-
+## RUV2 normalisation with k=2 ##########################
 fit <- eBayes(lmFit(useExp, model.matrix(~group_array)))
 fp_array <- topTable(fit, coef=2, number=Inf)
 fp_array <- cbind(infoExp[rownames(fp_array),], fp_array[,c(1,2,4,5)])
-ctl <- !infoExp$TargetID%in%fp_array$TargetID[1:5000]
-
-RUVnArray <- RUV2(Y=t(useExp), X=t(t(c(rep(0,6), rep(1,6)))), ctl=ctl, k=1)
-W2 <- RUVnArray$W
-I <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,1]
-C <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,-1]
-R2 <- useExp - as.matrix(C)%*%as.matrix(t(W2)) - I
-intk2 <- plotMDS(R2, col=c(rep("BLUE",6),rep("RED",6)), 
-                 xlab="PC1", ylab="PC2", 
-                 xlim=c(-0.6,1), ylim=c(-0.6,0.5),
-                 main="RUV-2 (k=1)",dim.plot=c(1,2),pch=20)
-text(intk2$x, intk2$y, Samples_array,
-     pos=c(1,1,1,3,3,1,1,1,1,1,1,1),
-     col=c(rep("BLUE",6),rep("RED",6)))
+ctl <- !infoExp$GeneName%in%fp_array$GeneName[1:5000]
 
 RUVnArray <- RUV2(Y=t(useExp), X=t(t(c(rep(0,6), rep(1,6)))), ctl=ctl, k=2)
-W2 <- RUVnArray$W
-I <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,1]
-C <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,-1]
-R2 <- useExp - as.matrix(C)%*%as.matrix(t(W2)) - I
-intk2 <- plotMDS(R2, col=c(rep("BLUE",6),rep("RED",6)), 
-                 xlab="PC1", ylab="PC2", 
-                 xlim=c(-0.6,1), ylim=c(-0.6,0.5),
-                 main="RUV-2 (k=2)",dim.plot=c(1,2),pch=20)
-text(intk2$x, intk2$y, Samples_array,
-     pos=c(1,1,2,4,3,3,1,1,1,1,1,1),
-     col=c(rep("BLUE",6),rep("RED",6)))
+W <- RUVnArray$W
 
-
-RUVnArray <- RUV2(Y=t(useExp), X=t(t(c(rep(0,6), rep(1,6)))), ctl=ctl, k=3)
-W2 <- RUVnArray$W
-I <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,1]
-C <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,-1]
-R2 <- useExp - as.matrix(C)%*%as.matrix(t(W2)) - I
-intk2 <- plotMDS(R2, col=c(rep("BLUE",6),rep("RED",6)), 
-                 xlab="PC1", ylab="PC2", 
-                 xlim=c(-0.6,1), 
-                ylim=c(-0.6,0.5),
-                 main="RUV-2 (k=3)",dim.plot=c(1,2),pch=20)
-text(intk2$x, intk2$y, Samples_array,
-     pos=c(1,1,2,4,3,3,1,2,1,2,1,4),
-     col=c(rep("BLUE",6),rep("RED",6)))
-
-## RUV2 normalisation with k=2 ##########################
-RUVnArray <- RUV2(Y=t(useExp), X=t(t(c(rep(0,6), rep(1,6)))), ctl=ctl, k=2)
-W2 <- RUVnArray$W
-I <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,1]
-C <- lmFit(useExp, design=model.matrix(~W2))$coefficients[,-1]
-R2 <- useExp - as.matrix(C)%*%as.matrix(t(W2)) - I
-
-par(mfrow=c(1,1))
-intk2 <- plotMDS(R2, col=c(rep("BLUE",6),rep("RED",6)), 
-                 xlab="PC1", ylab="PC2", 
-                 xlim=c(-0.6,1), ylim=c(-0.6,0.5),
-                 main="RUV-2 (k=2)",dim.plot=c(1,2),pch=20)
-text(intk2$x, intk2$y, Samples_array,
-     pos=c(1,1,2,4,3,3,1,1,1,1,1,1),
-     col=c(rep("BLUE",6),rep("RED",6)))
-
-R1 <- removeBatchEffect(useExp,covariates=W2,design=model.matrix(~group_array))
-
-R1<-cbind(infoExp,R1)
-R2<-cbind(infoExp,R2)
-
-plotPCA(as.matrix(R1[,-c(1,2)]),isLog=TRUE)
-plotPCA(as.matrix(R2[,-c(1,2)]),isLog=TRUE)
-
-## save(R1, file="../Results/R1.rda")
-## save(R2, file="../Results/R2.rda")
+R <- removeBatchEffect(useExp,covariates=W,design=model.matrix(~group_array))
+plotPCA(as.matrix(R),isLog=TRUE)
+R<-cbind(infoExp,R)
+## save(R, file="../Results/R.rda")
 
 ## Differential expression analysis #################
 
-design_array <- model.matrix(~RUVArray$W+group_array)
+design_array <- model.matrix(~W+group_array)
 fit <- eBayes(lmFit(useExp, design_array))
 FDR_array <- topTable(fit, coef=4, number=Inf)
 FDR_array <- cbind(infoExp[rownames(FDR_array),], FDR_array[,c(1,2,4,5)])
 rownames(FDR_array) <- 1:nrow(FDR_array)
 
-## Adding ProbeID #############################
-
-load("../Data/probe.rda")
-
-FDR_array <- cbind(FDR_array[,1],
-                   probe[match(FDR_array$ProbeID, probe$Array_Address_Id),c("Probe_Id")], 
-                   FDR_array[,-1])
-
-colnames(FDR_array)[1:3] <- c("GeneName","ProbeID", "AddressID")
-
-FDR_array$GeneName <- as.vector(FDR_array$GeneName)
-
-FDR_array$GeneName[grep("Mar",FDR_array$GeneName)] <- paste("MARCH",substr(FDR_array$GeneName[grep("Mar",FDR_array$GeneName)],1,1),sep="")
-FDR_array$GeneName[grep("Sep",FDR_array$GeneName)] <- paste("SEPT",substr(FDR_array$GeneName[grep("Sep",FDR_array$GeneName)],1,1),sep="")
-
-## Adding GeneID ########################
-
-arrayAnnot=read.csv("../Annot/HumanHT-12_V4_0_R2_15002873_B 2.csv")
-conv=read.csv("../Annot/conv_refseq_ensembl.csv")
-m=match(FDR_array$AddressID, arrayAnnot$Array_Address_Id)
-FDR_array$TxID=arrayAnnot$TxID_noV[m]
-m=match(FDR_array$TxID, conv$From)
-FDR_array$GeneID <- conv$To[m]
-FDR_array <- FDR_array[,c("GeneName","GeneID","TxID",
-                          "ProbeID","AddressID",
-                          "logFC","AveExpr","P.Value","adj.P.Val")]
-FDR_array <- FDR_array[!is.na(FDR_array$GeneID),]
 ## save(FDR_array, file="../Results/FDR_array.rda") 
 
 ## Calculate validation rate - 74% #################
@@ -166,3 +99,87 @@ DE_seq <- cbind(DE_seq,validationFDR)
 DE_seq_validated <- DE_seq[DE_seq$validationFDR<0.05 & DE_seq$logFC_seq*DE_seq$logFC_array>0, ]
 nrow(DE_seq_validated);nrow(DE_seq);nrow(DE_seq_validated)/nrow(DE_seq)
 
+## Differential expression analysis - Frontal ##########################
+## 54%
+useExpF <- useExp[,c(1,2,5,7,9,11)]
+groupF <- c(rep("control", 3), rep("Rett", 3))
+fit <- eBayes(lmFit(useExpF, model.matrix(~groupF)))
+fp_array <- topTable(fit, coef=2, number=Inf)
+fp_array <- cbind(infoExp[rownames(fp_array),], fp_array[,c(1,2,4,5)])
+ctlF <- !infoExp$GeneName%in%fp_array$GeneName[1:5000]
+
+RUVnArray <- RUV2(Y=t(useExpF), X=t(t(c(rep(0,3), rep(1,3)))), ctl=ctlF, k=2)
+WF <- RUVnArray$W
+RF <- removeBatchEffect(useExpF,covariates=WF,design=model.matrix(~groupF))
+plotPCA(as.matrix(RF),isLog=TRUE)
+RF<-cbind(infoExp,RF)
+
+design_array <- model.matrix(~WF+groupF)
+fit <- eBayes(lmFit(useExpF, design_array))
+FDR_F <- topTable(fit, coef=4, number=Inf)
+FDR_F <- cbind(infoExp[rownames(FDR_F),], FDR_F[,c(1,2,4,5)])
+rownames(FDR_F) <- 1:nrow(FDR_F)
+
+common <- cbind(FDR_seq[,-5],
+                FDR_F[match(FDR_seq$geneID, FDR_F$GeneID),-c(1,2)])
+
+colnames(common) <- c("geneID", "geneName",
+                      "logFC_seq","logCPM_seq", "pValue_seq", "FDR_seq",
+                      "TxID","probeID", "addressID", 
+                      "logFC_array", "aveExpr_array","pValue_array", "FDR_array")
+common <- common[!is.na(common$probeID),]
+rownames(common) <- 1:nrow(common)
+
+DE_seq <- common[common$FDR_seq<0.05,]
+validationFDR <- p.adjust(DE_seq$pValue_array,method="BH")
+DE_seq <- cbind(DE_seq,validationFDR)
+DE_seq_VF <- DE_seq[DE_seq$validationFDR<0.05 & DE_seq$logFC_seq*DE_seq$logFC_array>0, ]
+nrow(DE_seq_VF);nrow(DE_seq);nrow(DE_seq_VF)/nrow(DE_seq)
+
+## Differential expression analysis - Temporal ##########################
+## 67%
+useExpT <- useExp[,c(3,4,6,8,10,12)]
+fit <- eBayes(lmFit(useExpT, model.matrix(~groupF)))
+fp_array <- topTable(fit, coef=2, number=Inf)
+fp_array <- cbind(infoExp[rownames(fp_array),], fp_array[,c(1,2,4,5)])
+ctlT <- !infoExp$GeneName%in%fp_array$GeneName[1:5000]
+
+RUVnArray <- RUV2(Y=t(useExpT), X=t(t(c(rep(0,3), rep(1,3)))), ctl=ctlT, k=2)
+WT <- RUVnArray$W
+RT <- removeBatchEffect(useExpT,covariates=WT,design=model.matrix(~groupF))
+plotPCA(as.matrix(RT),isLog=TRUE)
+RT<-cbind(infoExp,RT)
+
+design_array <- model.matrix(~WT+groupF)
+fit <- eBayes(lmFit(useExpT, design_array))
+FDR_T <- topTable(fit, coef=4, number=Inf)
+FDR_T <- cbind(infoExp[rownames(FDR_T),], FDR_T[,c(1,2,4,5)])
+rownames(FDR_T) <- 1:nrow(FDR_T)
+
+common <- cbind(FDR_seq[,-5],
+                FDR_T[match(FDR_seq$geneID, FDR_T$GeneID),-c(1,2)])
+
+colnames(common) <- c("geneID", "geneName",
+                      "logFC_seq","logCPM_seq", "pValue_seq", "FDR_seq",
+                      "TxID","probeID", "addressID", 
+                      "logFC_array", "aveExpr_array","pValue_array", "FDR_array")
+common <- common[!is.na(common$probeID),]
+rownames(common) <- 1:nrow(common)
+
+DE_seq <- common[common$FDR_seq<0.05,]
+validationFDR <- p.adjust(DE_seq$pValue_array,method="BH")
+DE_seq <- cbind(DE_seq,validationFDR)
+DE_seq_VT <- DE_seq[DE_seq$validationFDR<0.05 & DE_seq$logFC_seq*DE_seq$logFC_array>0, ]
+nrow(DE_seq_VT);nrow(DE_seq);nrow(DE_seq_VT)/nrow(DE_seq)
+
+## More comparisons ############
+A <- unique(union(DE_seq_VT$geneName,DE_seq_VF$geneName))
+length(A)/nrow(DE_seq)
+## 72%
+B<-unique(union(A,DE_seq_validated))
+length(B)/nrow(DE_seq)
+## 80%
+C<-setdiff(DE_seq_validated$geneName,union(DE_seq_VT$geneName,DE_seq_VF$geneName))
+length(C)
+D<-setdiff(union(DE_seq_VT$geneName,DE_seq_VF$geneName),DE_seq_validated$geneName)
+length(D)
