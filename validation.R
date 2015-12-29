@@ -183,3 +183,4 @@ C<-setdiff(DE_seq_validated$geneName,union(DE_seq_VT$geneName,DE_seq_VF$geneName
 length(C)
 D<-setdiff(union(DE_seq_VT$geneName,DE_seq_VF$geneName),DE_seq_validated$geneName)
 length(D)
+setdiff(intersect(DE_seq_VT$geneName,DE_seq_VF$geneName),DE_seq_validated$geneName)
