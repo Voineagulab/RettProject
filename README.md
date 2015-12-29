@@ -11,7 +11,7 @@ This script generates gene-level quantification of RNASeq reads.
 Job script if one wants to run geneCounts.R on HPC.
 
 ## Deconvolution.R ################################
-This file uses deconvolution methods to estimate the proportions of neurons in the samples.
+This file uses deconvolution methods to estimate the proportions of neurons in the micro-array samples before and after RUV.
 
 ## DEAnalysis.R ##################################
 This file performs differential expression analysis on RNASeq data.
