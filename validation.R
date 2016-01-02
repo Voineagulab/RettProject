@@ -172,6 +172,22 @@ DE_seq <- cbind(DE_seq,validationFDR)
 DE_seq_VT <- DE_seq[DE_seq$validationFDR<0.05 & DE_seq$logFC_seq*DE_seq$logFC_array>0, ]
 nrow(DE_seq_VT);nrow(DE_seq);nrow(DE_seq_VT)/nrow(DE_seq)
 
+## Frontal vs Temporal ############
+Z<-intersect(DE_seq_VF$geneName,DE_seq_VT$geneName)
+q<-length(Z)
+m<-nrow(DE_seq_VF)
+n<-nrow(DE_seq)-m
+k<-nrow(DE_seq_VT)
+phyper(q,m,n,k,lower.tail = FALSE)
+
+## complement cascade #######
+CC <- c("C1QA","C1QB","C1QC",
+        "C3","TGFBR2","CX3CR1","TYROBP")
+CC%in%Z
+CC%in%DE_seq$geneName
+CC%in%DE_seq_VT$geneName
+CC%in%DE_seq_VF$geneName
+
 ## More comparisons ############
 A <- unique(union(DE_seq_VT$geneName,DE_seq_VF$geneName))
 length(A)/nrow(DE_seq)
