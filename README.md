@@ -16,6 +16,9 @@ This file uses deconvolution methods to estimate the proportions of neurons in t
 ## DEAnalysis.R ##################################
 This file performs differential expression analysis on RNASeq data.
 
+## arrayData.R ##################################
+This file adds annotations to micro-array data.
+
 ## validation.R #################################
 This file uses micro-array data to calculate the validation rate of the RNA-Seq differentially expressed genes - 74%. 
 
