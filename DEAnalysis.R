@@ -66,6 +66,42 @@ plotMDS(DGEList(RUV2$normalizedCounts), col=c(rep("blue",3),rep("red",3)),
 
 plotPCA(N)
 ## save(N, file="../Results/N.rda")
+
+## Regions
+
+## Regional Analysis #############################
+#regions <- c("P","T",rep("P",4))
+regions <- c(0,1,rep(0,4))
+
+## before RUV
+input <- DGEList(counts=counts, group=regions)
+input <- calcNormFactors(input)
+
+input <- estimateCommonDisp(input, verbose=TRUE)
+input <- estimateTagwiseDisp(input)
+plotBCV(input)
+et <- exactTest(input)
+FDR_regions_bRUV <- data.frame(topTags(et,n=Inf))
+
+## after RUV
+design_regions <- model.matrix(~RUV1$W+regions)
+
+input <- DGEList(counts=counts, group=regions)
+input <- calcNormFactors(input, method="none")
+
+input <- estimateGLMCommonDisp(input, design_regions, verbose=TRUE)
+input <- estimateGLMTrendedDisp(input, design_regions)
+input <- estimateGLMTagwiseDisp(input, design_regions)
+plotBCV(input)
+
+fit <- glmFit(input, design_regions)
+et <- glmLRT(fit)
+
+FDR_seq <- data.frame(topTags(et, n=Inf))
+FDR_seq <- cbind(rownames(FDR_seq), FDR_seq)
+colnames(FDR_seq)[1] <- "genes"
+rownames(FDR_seq) <- 1:nrow(FDR_seq)
+
 ## Differential expression analysis #############################################
 design <- model.matrix(~RUV1$W+group_seq)
 

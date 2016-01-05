@@ -37,6 +37,55 @@ plotPCA(as.matrix(R),isLog=TRUE)
 R<-cbind(infoExp,R)
 ## save(R, file="../Results/R.rda")
 
+## Regional Differences ##########
+
+regions <- c("F","F","T","T","F","T","F","T","F","T","F","T")
+
+## before RUV
+fit_region_bRUV <- eBayes(lmFit(useExp, model.matrix(~regions)))
+FDR_region_bRUV <- topTable(fit_region_bRUV, coef=2, number=Inf)
+FDR_region_bRUV <- cbind(infoExp[rownames(FDR_region_bRUV),], FDR_region_bRUV[,c(1,2,4,5)])
+
+## after RUV
+design_region <- model.matrix(~W+regions)
+fit_region <- eBayes(lmFit(useExp, design_region))
+FDR_region <- topTable(fit_region, coef=4, number=Inf)
+FDR_region <- cbind(infoExp[rownames(FDR_region),], FDR_region[,c(1,2,4,5)])
+rownames(FDR_region) <- 1:nrow(FDR_region)
+
+## Regional Differences - Control Only ##########
+
+regions <- c("F","F","T","T","F","T")
+
+## before RUV
+fit_region_bRUV <- eBayes(lmFit(useExp[,1:6], model.matrix(~regions)))
+FDR_region_bRUV <- topTable(fit_region_bRUV, coef=2, number=Inf)
+FDR_region_bRUV <- cbind(infoExp[rownames(FDR_region_bRUV),], FDR_region_bRUV[,c(1,2,4,5)])
+
+## after RUV
+design_region <- model.matrix(~W[1:6,]+regions)
+fit_region <- eBayes(lmFit(useExp[,1:6], design_region))
+FDR_region <- topTable(fit_region, coef=4, number=Inf)
+FDR_region <- cbind(infoExp[rownames(FDR_region),], FDR_region[,c(1,2,4,5)])
+rownames(FDR_region) <- 1:nrow(FDR_region)
+
+## Regional Differences - Rett Only ##########
+
+regions <- c("F","T","F","T","F","T")
+
+## before RUV
+fit_region_bRUV <- eBayes(lmFit(useExp[,7:12], model.matrix(~regions)))
+FDR_region_bRUV <- topTable(fit_region_bRUV, coef=2, number=Inf)
+FDR_region_bRUV <- cbind(infoExp[rownames(FDR_region_bRUV),], FDR_region_bRUV[,c(1,2,4,5)])
+
+## after RUV
+design_region <- model.matrix(~W[7:12,]+regions)
+fit_region <- eBayes(lmFit(useExp[,7:12], design_region))
+FDR_region <- topTable(fit_region, coef=4, number=Inf)
+FDR_region <- cbind(infoExp[rownames(FDR_region),], FDR_region[,c(1,2,4,5)])
+rownames(FDR_region) <- 1:nrow(FDR_region)
+
+
 ## Differential expression analysis #################
 
 design_array <- model.matrix(~W+group_array)
