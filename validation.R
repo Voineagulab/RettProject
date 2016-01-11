@@ -183,6 +183,9 @@ FDR_F <- topTable(fit, coef=4, number=Inf)
 FDR_F <- cbind(infoExp[rownames(FDR_F),], FDR_F[,c(1,2,4,5)])
 rownames(FDR_F) <- 1:nrow(FDR_F)
 
+nrow(FDR_F[FDR_F$adj.P.Val<0.05,])
+## 28 significant
+
 ## Differential expression analysis - Temporal ##########################
 
 useExpT <- useExp[,c(3,4,6,8,10,12)]
@@ -202,3 +205,6 @@ fit <- eBayes(lmFit(useExpT, design_array))
 FDR_T <- topTable(fit, coef=4, number=Inf)
 FDR_T <- cbind(infoExp[rownames(FDR_T),], FDR_T[,c(1,2,4,5)])
 rownames(FDR_T) <- 1:nrow(FDR_T)
+
+nrow(FDR_T[FDR_T$adj.P.Val<0.05,])
+## 10 significant
