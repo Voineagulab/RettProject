@@ -1,6 +1,4 @@
 ## Set-up ##########################
-
-setwd("/Volumes/Data0/PROJECTS/RettSyndromeTranscriptome/GitHub/RettProject")
 library(EDASeq)
 library(edgeR)
 library(CellMix)
@@ -22,14 +20,13 @@ txtdesc <- function(x) textConnection(paste(x, collapse="\n"))
 ML_cahoy=MarkerList(file=txtdesc(c(paste(asts,"Astrocytes"),paste(neus,"Neurons"))))
 
 ## Part II: Micro-array before RUV ########################################
-pdf("Plots_DeconvArray.pdf", height=8, width = 10)
+pdf("../Results/Plots_DeconvArray.pdf", height=10, width = 10)
 ## log scale
 dataExp <- read.csv("../Data/dataExpProbes.csv")
 colnames(dataExp)[-c(1:2)] <- Samples_array
 dataExp <- aggregate(dataExp[,-c(1,2)],by=list(dataExp$TargetID),FUN=mean)
 rownames(dataExp)<-dataExp$Group.1
 dataExp<-as.matrix(dataExp[,-1])
-plotMDS(dataExp,  main="MDS before RUV,log2 transformed data")
 dec_cahoy=ged(dataExp,ML_cahoy,"ssKL")
 dec_array_bRUV <- dec_cahoy@fit@H
 barplot(height=as.numeric(dec_array_bRUV[2,]), 
@@ -58,7 +55,6 @@ load("../Results/R1.rda")
 dataExp <- aggregate(R1[,-c(1,2)],by=list(R1$TargetID),FUN=mean)
 rownames(dataExp)<-dataExp$Group.1
 dataExp<-as.matrix(dataExp[,-1])
-plotMDS(dataExp, main="MDS after RUV,log2 transformed data")
 dec_cahoy=ged(2^dataExp,ML_cahoy,"ssKL")
 dec_array_aRUV <- dec_cahoy@fit@H
 barplot(dec_array_aRUV[2,], col=c(rep("blue",6),rep("red",6)),ylim=c(0.59, 0.66),xpd=FALSE, main="Deconv after RUV,NON-log2 transformed data")

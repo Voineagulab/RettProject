@@ -27,22 +27,13 @@ colnames(counts) <- Samples_seq
 colnames(RPKM) <- Samples_seq
 colnames(CPM) <- Samples_seq
 
-## Neuron Levels Plot ####################################################### 
-
-barplot(height=1-as.numeric(Astro_seq), 
-        names.arg=Samples_seq,
-        ylab = "Proportion of Neurons",
-        ylim=c(0.48,0.52), col=c(rep("blue", 3), rep("red", 3)),
-        xpd=FALSE)
-abline(h=0.5, col="grey")
-
 ## PC plots ###################################################################
 group_seq <- c("control", "control", "control", "Rett", "Rett", "Rett")
 input <- DGEList(counts=counts, group=group_seq)
 input <- calcNormFactors(input)
 plotMDS(input, col=c(rep("blue",3),rep("red",3)),
         xlab="PC1", ylab="PC2", main="TMM Normalisation")
-plotPCA(counts)
+## plotPCA(counts)
 
 ## first past differential expression analysis ####################################
 
@@ -64,7 +55,7 @@ RUV2 <- RUVg(counts, controlGenes, k=2)
 plotMDS(DGEList(RUV2$normalizedCounts), col=c(rep("blue",3),rep("red",3)),
         xlab="PC1", ylab="PC2", main="RUVg (k=2)")
 
-plotPCA(N)
+## plotPCA(N)
 ## save(N, file="../Results/N.rda")
 
 ## Regions
