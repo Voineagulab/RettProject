@@ -208,3 +208,10 @@ rownames(FDR_T) <- 1:nrow(FDR_T)
 
 nrow(FDR_T[FDR_T$adj.P.Val<0.05,])
 ## 10 significant
+
+## Frontal vs Temporal
+sig_F <- FDR_F[FDR_F$adj.P.Val<0.05,]$GeneName
+sig_T <- FDR_T[FDR_T$adj.P.Val<0.05,]$GeneName
+sig_FT <- intersect(sig_F,sig_T)
+## 2 "CSF1R"  "CX3CR1"
+
